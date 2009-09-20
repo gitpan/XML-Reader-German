@@ -1,0 +1,31 @@
+XML-Reader-German Version 0.01
+
+German documentation for XML::Reader
+
+There aren't any machine dependencies, no C compiler is required.
+
+
+INSTALLATION
+
+To install this module, run the following commands:
+
+	perl Makefile.PL
+	make
+	make test
+	make install
+
+SUPPORT AND DOCUMENTATION
+
+After installing, you can find documentation for this module with the
+perldoc command.
+
+    perldoc XML::Reader::German
+
+
+COPYRIGHT AND LICENSE
+
+Copyright (C) 2009 by Klaus Eichner
+
+All rights reserved. This program is free software; you can redistribute
+it and/or modify it under the terms of the artistic license,
+see http://www.opensource.org/licenses/artistic-license-1.0.php
