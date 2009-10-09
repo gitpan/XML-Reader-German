@@ -1,4 +1,4 @@
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 print "This document is the German translation from English of the module XML::Reader. In order to\n";
 print "get the Perl source code of the module, please see file XML/Reader.pm\n";
@@ -881,6 +881,65 @@ Wert 'end...' (welchen wir nicht ausgeben wollen) unterscheiden kE<ouml>nnen.
       }
   }
 
+=head1 FUNKTIONEN
+
+=head2 Funktion slurp_xml
+
+Die Funktion slurp_xml liest eine XML Datei und legt die Daten in einer Array-Referenz ab. Hier ist
+ein Beispiel in dem wir den Namen, die Strasse und die Stadt fE<uuml>r alle Kunden im Pfad
+'/data/order/database/customer' erhalten wollen:
+
+  use XML::Reader qw(slurp_xml);
+
+  my $line2 = q{
+  <data>
+    <order>
+      <database>
+        <customer name="smith" id="652">
+          <street>high street</street>
+          <city>boston</city>
+        </customer>
+        <customer name="jones" id="184">
+          <street>maple street</street>
+          <city>new york</city>
+        </customer>
+        <customer name="stewart" id="520">
+          <street>ring road</street>
+          <city>dallas</city>
+        </customer>
+      </database>
+    </order>
+    <dummy value="ttt">test</dummy>
+    <supplier>hhh</supplier>
+    <supplier>iii</supplier>
+    <supplier>jjj</supplier>
+  </data>
+  };
+
+  my $aref = slurp_xml(\$line2, '/data/order/database/customer',
+    ['/@name', '/street', '/city']);
+
+  for (@$aref) {
+      printf "Name = %-7s Street = %-12s City = %s\n", $_->[0], $_->[1], $_->[2];
+  }
+
+Der erste Parameter in slurp_xml ist entweder der Dateiname (oder eine Skalar Referenz, oder ein offenes
+Dateihandle) der XML Datei die wir einlesen wollen. In diesem Fall lesen wir von der Skalar Referenz \$line2.
+Der zweite Parameter ist die Wurzel des Baumes den wir einlesen wollen. (in diesem Falle wE<auml>re das
+'/data/order/database/customer'). Schliesslich geben wir noch eine Liste von Elementen an die wir selektieren
+wollen, relative zur Wurzel. In diesem Falle wE<auml>re das ['/@name', '/street', '/city'].
+
+Hier ist das Resultat:
+
+  Name = smith   Street = high street  City = boston
+  Name = jones   Street = maple street City = new york
+  Name = stewart Street = ring road    City = dallas
+
+slurp_xml funktioniert E<auml>hnlich wie L<XML::Simple>, insofern als dass alle benE<ouml>tigten Informationen
+in einem Rutsch in einer Speicherstruktur abgelegt werden. Der Unterschied jedoch ist dass slurp_xml uns erlaubt
+spezifische Daten zu selektieren bevor das Einlesen beginnt. Dieses hat zur Folge dass die sich ergebende
+Speicherstruktur kleiner ist, und damit auch weniger kompliziert.
+
 =head1 AUTOR
 
 Klaus Eichner, March 2009
@@ -906,6 +965,7 @@ Ausgabe-Datei).
 =head1 REFERENZEN
 
 L<XML::TokeParser>,
+L<XML::Simple>,
 L<XML::Parser>,
 L<XML::Parser::Expat>,
 L<XML::TiePYX>,

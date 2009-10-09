@@ -2,3 +2,6 @@ Revision history for XML-Reader-German
 
 0.01    20 Sep 2009
         First version, released on an unsuspecting world.
+
+0.02    09 Oct 2009
+        Introduce a new function: 'slurp_xml' to slurp xml into an array-ref
