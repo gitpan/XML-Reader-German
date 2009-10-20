@@ -1,4 +1,4 @@
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 print "This document is the German translation from English of the module XML::Reader. In order to\n";
 print "get the Perl source code of the module, please see file XML/Reader.pm\n";
@@ -887,12 +887,15 @@ Wert 'end...' (welchen wir nicht ausgeben wollen) unterscheiden kE<ouml>nnen.
 
 Die Funktion slurp_xml liest eine XML Datei und legt die Daten in einer Array-Referenz ab. Hier ist
 ein Beispiel in dem wir den Namen, die Strasse und die Stadt fE<uuml>r alle Kunden im Pfad
-'/data/order/database/customer' erhalten wollen:
+'/data/order/database/customer' erhalten wollen. Wir wollen ausserdem alle Supplier im Pfad
+'/data/supplier' erhalten:
 
   use XML::Reader qw(slurp_xml);
 
   my $line2 = q{
   <data>
+    <supplier>ggg</supplier>
+    <supplier>hhh</supplier>
     <order>
       <database>
         <customer name="smith" id="652">
@@ -910,35 +913,48 @@ ein Beispiel in dem wir den Namen, die Strasse und die Stadt fE<uuml>r alle Kund
       </database>
     </order>
     <dummy value="ttt">test</dummy>
-    <supplier>hhh</supplier>
     <supplier>iii</supplier>
     <supplier>jjj</supplier>
   </data>
   };
 
-  my $aref = slurp_xml(\$line2, '/data/order/database/customer',
-    ['/@name', '/street', '/city']);
+  my $aref = slurp_xml(\$line2,
+    { root => '/data/order/database/customer', branch => ['/@name', '/street', '/city'] },
+    { root => '/data/supplier',                branch => ['/']                          },
+  );
 
-  for (@$aref) {
-      printf "Name = %-7s Street = %-12s City = %s\n", $_->[0], $_->[1], $_->[2];
+  for (@{$aref->[0]}) {
+      printf "Cust: Name = %-7s Street = %-12s City = %s\n", $_->[0], $_->[1], $_->[2];
+  }
+
+  print "\n";
+
+  for (@{$aref->[1]}) {
+      printf "Supp: Name = %s\n", $_->[0];
   }
 
 Der erste Parameter in slurp_xml ist entweder der Dateiname (oder eine Skalar Referenz, oder ein offenes
 Dateihandle) der XML Datei die wir einlesen wollen. In diesem Fall lesen wir von der Skalar Referenz \$line2.
-Der zweite Parameter ist die Wurzel des Baumes den wir einlesen wollen. (in diesem Falle wE<auml>re das
-'/data/order/database/customer'). Schliesslich geben wir noch eine Liste von Elementen an die wir selektieren
-wollen, relative zur Wurzel. In diesem Falle wE<auml>re das ['/@name', '/street', '/city'].
+Der nE<auml>chste Parameter ist die Wurzel des Baumes den wir einlesen wollen (in diesem Falle wE<auml>re das
+'/data/order/database/customer') mit einer Liste von Elementen die wir, relativ zur Wurzel, selektieren
+wollen, in diesem Falle wE<auml>re das ['/@name', '/street', '/city']. Der darauffolgende Parameter ist eine
+zweite Wurzel (root/branch Definition), in diesem Falle ist es root => '/data/supplier' mit branch => ['/'].
 
 Hier ist das Resultat:
 
-  Name = smith   Street = high street  City = boston
-  Name = jones   Street = maple street City = new york
-  Name = stewart Street = ring road    City = dallas
+  Cust: Name = smith   Street = high street  City = boston
+  Cust: Name = jones   Street = maple street City = new york
+  Cust: Name = stewart Street = ring road    City = dallas
+
+  Supp: Name = ggg
+  Supp: Name = hhh
+  Supp: Name = iii
+  Supp: Name = jjj
 
 slurp_xml funktioniert E<auml>hnlich wie L<XML::Simple>, insofern als dass alle benE<ouml>tigten Informationen
 in einem Rutsch in einer Speicherstruktur abgelegt werden. Der Unterschied jedoch ist dass slurp_xml uns erlaubt
 spezifische Daten zu selektieren bevor das Einlesen beginnt. Dieses hat zur Folge dass die sich ergebende
-Speicherstruktur kleiner ist, und damit auch weniger kompliziert.
+Speicherstruktur meistens kleiner ist, und damit auch weniger kompliziert.
 
 =head1 AUTOR
 
