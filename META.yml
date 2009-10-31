@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               XML-Reader-German
-version:            0.03
+version:            0.04
 abstract:           Lesen von XML-Dateien und Bereitstellung der Pfad information basierend auf einem Pull-Parser.
 author:
     - Klaus Eichner <klaus03@gmail.com>

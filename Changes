@@ -7,4 +7,7 @@ Revision history for XML-Reader-German
         Introduce a new function: 'slurp_xml' to slurp xml into an array-ref
 
 0.03    13 Oct 2009
-        Allow multiple roots in 'slurp_xml'
+        Allow multiple roots in 'slurp_xml' (see XML::Reader ver 0.28)
+
+0.04    29 Oct 2009
+        Add {filter => 5} (see XML::Reader ver 0.29)

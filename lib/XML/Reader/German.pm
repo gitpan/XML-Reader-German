@@ -1,4 +1,4 @@
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 print "This document is the German translation from English of the module XML::Reader. In order to\n";
 print "get the Perl source code of the module, please see file XML/Reader.pm\n";
@@ -185,7 +185,14 @@ entfernt). Anstelle dessen werden die Attribute in einer Hash-Referenz $rdr->att
 Option {filter => 4} bricht alle Zeilen in individuelle Start-Tags, End-Tags, Attribute, Kommentare und
 Processing-Instructions auf. Damit wird die Verarbeitung der XML-Datei im PYX-Format ermE<ouml>glicht.
 
-Die Syntax lautet {filter => 2|3|4}, die Voreinstellung ist {filter => 2}
+Option {filter => 5} selektiert nur die Daten fE<uuml>r die vorgegebenen Wurzeln ("root"). Die Datenelemente
+jeder Wurzel werden in einer Array Referenz (wie spezifiziert durch den "branch" Parameter) gesammelt
+und dann zurE<uuml>ckgegeben wenn der "branch" komplett ist. Diese Vorgehensweise liegt auf halbem Weg
+zwischen der Option "using" (wo alle Elemente einzeln zurE<uuml>ckgeliefert werden) und der Funktion
+"slurp_xml" (wo alle Elemente in einem "branch" gesammelt werden, und alle "branches" dann am Ende in
+einer grossen Speicherstruktur auf einmal zurE<uuml>ckgeliefert werden).
+
+Die Syntax lautet {filter => 2|3|4|5}, die Voreinstellung ist {filter => 2}
 
 =item Option {strip => }
 
@@ -781,6 +788,75 @@ Hier ist das Ergebnis:
 
 
 Bitte beachten Sie dass fE<uuml>r alle Texte und fE<uuml>r alle Attribute v=1 gesetzt ist (d.h. $rdr->C<is_value> == 1).
+
+=head2 Option {filter => 5}
+
+Mit der Option {filter => 5} spezifiziert man eine (oder mehrere) Wurzeln ("root"), jede "root" hat eine Liste
+von E<Auml>sten ("branch"). Man erhE<auml>lt daraufhin genau einen Record fE<uuml>r jedes Auftreten der "root" in
+der XML Struktur. Jeder Record enthE<auml>lt genau die Elemente die in der "branch" Struktur definiert wurden.
+Am einfachsten lE<auml>sst sich dieses an einem Beispiel erklE<auml>ren:
+
+  use XML::Reader;
+
+  my $line2 = q{
+  <data>
+    <supplier>ggg</supplier>
+    <supplier>hhh</supplier>
+    <order>
+      <database>
+        <customer name="smith" id="652">
+          <street>high street</street>
+          <city>boston</city>
+        </customer>
+        <customer name="jones" id="184">
+          <street>maple street</street>
+          <city>new york</city>
+        </customer>
+        <customer name="stewart" id="520">
+          <street>ring road</street>
+          <city>dallas</city>
+        </customer>
+      </database>
+    </order>
+    <dummy value="ttt">test</dummy>
+    <supplier>iii</supplier>
+    <supplier>jjj</supplier>
+  </data>
+  };
+
+Wir wollen aus der oben angegebenen XML-Datei die Elemente "name", "street" und "city"
+fE<uuml>r alle Customer des Pfades '/data/order/database/customer' auslesen. Ausserdem wollen
+wir den Supplier im Pfad '/data/supplier' lesen. Die Daten der ersten Wurzel
+'/data/order/database/customer' erkennt man anhand der Bedingung $rdr->rx == 0, die
+Daten der zweiten Wurzel '/data/supplier' erkennt man anhand der Bedingung $rdr->rx == 1.
+
+  my $rdr = XML::Reader->newhd(\$line2, {filter => 5},
+    { root => '/data/order/database/customer', branch => ['/@name', '/street', '/city'] },
+    { root => '/data/supplier',                branch => ['/']                          },
+  );
+
+  while ($rdr->iterate) {
+      if ($rdr->rx == 0) {
+          for ($rdr->rvalue) {
+              printf "Cust: Name = %-7s Street = %-12s City = %s\n", $_->[0], $_->[1], $_->[2];
+          }
+      }
+      elsif ($rdr->rx == 1) {
+          for ($rdr->rvalue) {
+              printf "Supp: Name = %s\n", $_->[0];
+          }
+      }
+  }
+
+Hier ist das Ergebnis:
+
+  Supp: Name = ggg
+  Supp: Name = hhh
+  Cust: Name = smith   Street = high street  City = boston
+  Cust: Name = jones   Street = maple street City = new york
+  Cust: Name = stewart Street = ring road    City = dallas
+  Supp: Name = iii
+  Supp: Name = jjj
 
 =head1 BEISPIELE
 
